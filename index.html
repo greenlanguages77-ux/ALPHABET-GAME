@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Wheel Phonics Game - Letter Sounds A-Z</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#FF3E7F; --yellow:#FFD23F; --blue:#00B4D8; --green:#06D6A0;
+    --purple:#9B5DE5; --orange:#FF8C42; --navy:#241468; --cream:#FFF8EC; --ink:#241468;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;font-family:'Nunito',sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%, #3d2599 0%, transparent 45%),
+      radial-gradient(circle at 85% 15%, #7a2d9e 0%, transparent 40%),
+      linear-gradient(160deg, var(--navy) 0%, #4a1e8f 55%, #7a2d9e 100%);
+    background-attachment:fixed;color:var(--ink);overflow-x:hidden;min-height:100%;
+  }
+  .stars-bg{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #ffffff55 50%, transparent),
+      radial-gradient(2px 2px at 140px 80px, #ffffff44 50%, transparent),
+      radial-gradient(3px 3px at 250px 160px, #ffffff55 50%, transparent),
+      radial-gradient(2px 2px at 320px 40px, #ffffff33 50%, transparent),
+      radial-gradient(2px 2px at 60px 200px, #ffffff40 50%, transparent);
+    background-repeat:repeat;background-size:400px 300px;
+  }
+  .wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:18px 16px 60px;}
+
+  .banner{text-align:center;padding:18px 20px 24px;margin-bottom:18px;position:relative;}
+  .banner h1{
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(26px,5vw,42px);
+    color:var(--yellow);-webkit-text-stroke:2.5px var(--navy);letter-spacing:0.5px;margin:0 0 6px;
+    text-shadow:4px 4px 0 var(--pink);line-height:1.2;
+  }
+  .banner p{
+    font-weight:700;color:#fff;font-size:clamp(13px,2.1vw,17px);margin:0;
+    background:var(--purple);display:inline-block;padding:6px 18px;border-radius:20px;border:3px solid #fff;
+  }
+  .banner .vi-sub{
+    display:block;margin:8px auto 0;font-weight:700;color:#fff;font-size:clamp(12px,1.8vw,15px);
+    background:rgba(255,255,255,.18);width:fit-content;padding:4px 16px;border-radius:16px;font-style:italic;
+  }
+  .bulbs{display:flex;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .bulb{width:12px;height:12px;border-radius:50%;box-shadow:0 0 10px 3px currentColor;animation:blink 1.2s infinite ease-in-out;}
+  @keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.8);}}
+
+  .topbar{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:22px;}
+  .ticket{
+    background:var(--cream);border-radius:14px;padding:10px 22px;
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:clamp(15px,2vw,19px);
+    color:var(--navy);border:3px dashed var(--pink);display:flex;align-items:center;gap:8px;
+    box-shadow:0 6px 0 rgba(0,0,0,0.15);
+  }
+  .ticket .big{font-size:1.3em;font-family:'Baloo 2';font-weight:800;color:var(--pink);}
+
+  .game-area{display:flex;flex-direction:column;align-items:center;gap:24px;}
+  .wheel-zone{position:relative;width:min(88vw,420px);height:min(88vw,420px);}
+  .lightring{position:absolute;inset:-18px;border-radius:50%;pointer-events:none;}
+  .lightring .b{
+    position:absolute;width:14px;height:14px;border-radius:50%;
+    background:var(--yellow);box-shadow:0 0 12px 4px var(--yellow);
+    top:50%;left:50%;margin:-7px;animation:chase 1.6s linear infinite;
+  }
+  @keyframes chase{0%,100%{opacity:1;}50%{opacity:.25;}}
+  .pointer{
+    position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:0;height:0;
+    border-left:16px solid transparent;border-right:16px solid transparent;
+    border-top:32px solid var(--pink);z-index:5;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));
+  }
+  #wheelSvg{
+    width:100%;height:100%;display:block;transform-origin:50% 50%;
+    filter:drop-shadow(0 10px 18px rgba(0,0,0,.35));transition:transform 3.4s cubic-bezier(.17,.67,.16,1);
+  }
+  .hub{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--yellow) 60%, var(--orange));
+    border:4px solid #fff;display:flex;align-items:center;justify-content:center;
+    font-size:28px;z-index:4;box-shadow:0 4px 10px rgba(0,0,0,.3);
+  }
+  .spin-btn{
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(18px,3vw,24px);color:#fff;
+    background:linear-gradient(180deg,var(--green),#04a67f);border:none;border-radius:50px;
+    padding:16px 48px;cursor:pointer;box-shadow:0 7px 0 #037a5c, 0 12px 20px rgba(0,0,0,.35);
+    transition:transform .08s ease;letter-spacing:1px;
+  }
+  .spin-btn:active{transform:translateY(5px);box-shadow:0 2px 0 #037a5c;}
+  .spin-btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.4);}
+  .hint-text{color:#fff;font-weight:700;text-align:center;font-size:15px;background:rgba(0,0,0,.25);padding:6px 16px;border-radius:12px;}
+  .hint-text-vi{color:#ffe9b0;font-weight:700;text-align:center;font-size:13px;font-style:italic;margin-top:-6px;}
+  .audio-warning{
+    display:none;max-width:640px;margin:0 auto 14px;text-align:center;
+    background:#fff3cd;color:#7a5b00;border:3px solid #ffd23f;border-radius:14px;
+    padding:12px 18px;font-weight:700;font-size:14px;line-height:1.5;
+  }
+
+  .overlay{
+    position:fixed;inset:0;background:rgba(20,10,50,.75);display:none;
+    align-items:center;justify-content:center;z-index:50;padding:16px;backdrop-filter:blur(2px);
+  }
+  .overlay.show{display:flex;}
+  .qcard{
+    background:var(--cream);border-radius:26px;max-width:580px;width:100%;padding:26px 26px 30px;
+    position:relative;border:6px solid #fff;box-shadow:0 20px 50px rgba(0,0,0,.5);
+    animation:pop .35s cubic-bezier(.2,1.4,.4,1);max-height:92vh;overflow-y:auto;
+  }
+  @keyframes pop{0%{transform:scale(.6);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .qletter-badge{
+    position:absolute;top:-22px;left:-22px;width:64px;height:64px;border-radius:50%;
+    background:linear-gradient(160deg,var(--pink),var(--purple));border:4px solid #fff;color:#fff;
+    font-family:'Baloo 2';font-weight:800;font-size:28px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 12px rgba(0,0,0,.3);
+  }
+  .zone{
+    border-radius:18px;padding:14px 16px 12px;margin:0 auto 12px;max-width:480px;
+  }
+  .zone-label{
+    font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:1px;
+    text-align:center;margin-bottom:8px;
+  }
+  .zone-label .vi{font-size:11px;text-transform:none;font-style:italic;font-weight:700;opacity:.85;}
+  .sound-zone{background:linear-gradient(160deg,#fff3e6,#fff);border:3px solid var(--orange);}
+  .sound-zone .zone-label{color:#b45400;}
+  .name-zone{background:linear-gradient(160deg,#e6f7fb,#fff);border:3px solid var(--blue);}
+  .name-zone .zone-label{color:#0086a3;}
+  .qtype{font-weight:800;color:var(--purple);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center;}
+  .sound-chip{
+    display:block;margin:0 auto 10px;width:fit-content;
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(22px,4vw,30px);
+    color:#fff;background:linear-gradient(160deg,var(--orange),#e06a00);
+    padding:6px 22px;border-radius:16px;border:3px solid #fff;
+    box-shadow:0 5px 0 #b45400;letter-spacing:1px;
+  }
+  .chant-line{
+    display:block;margin:0 auto 10px;width:fit-content;max-width:92%;
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(15px,3vw,19px);
+    color:var(--navy);background:#fff;padding:8px 18px;border-radius:14px;
+    border:3px dashed var(--purple);text-align:center;line-height:1.4;
+  }
+  .chant-line .hl{color:var(--pink);}
+  .qprompt{
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:clamp(16px,2.9vw,21px);
+    text-align:center;color:var(--navy);margin:4px 0 4px;line-height:1.35;
+  }
+  .qprompt-vi{
+    font-family:'Nunito';font-weight:700;font-style:italic;font-size:13.5px;
+    text-align:center;color:#7a4fc9;margin:0 0 10px;line-height:1.4;
+  }
+  .listen-btn{
+    display:block;margin:8px auto 0;background:var(--blue);color:#fff;border:none;
+    font-family:'Baloo 2';font-weight:700;font-size:16px;padding:10px 24px;border-radius:40px;
+    cursor:pointer;box-shadow:0 5px 0 #0086a3;
+  }
+  .listen-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #0086a3;}
+  .name-btn{
+    display:block;margin:0 auto 8px;background:var(--blue);color:#fff;border:none;
+    font-family:'Baloo 2';font-weight:700;font-size:15px;padding:9px 22px;border-radius:40px;
+    cursor:pointer;box-shadow:0 4px 0 #0086a3;
+  }
+  .name-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #0086a3;}
+  .name-ipa{
+    text-align:center;font-family:'Baloo 2';font-weight:800;font-size:22px;
+    color:#0086a3;margin:4px auto 0;
+  }
+  .sound-vs-name{
+    text-align:center;font-size:12.5px;font-style:italic;color:#6b5b95;
+    margin:0 auto 14px;max-width:460px;line-height:1.4;
+  }
+  .sound-vs-name b{color:var(--pink);font-style:normal;}
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px;}
+  .opt-img{
+    position:relative;background:#fff;border:4px solid var(--purple);border-radius:20px;
+    padding:16px 8px 12px;cursor:pointer;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:4px;transition:transform .1s ease, background .15s ease;
+  }
+  .opt-img .opt-emoji{font-size:52px;line-height:1;}
+  .opt-img .opt-word{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;color:var(--navy);letter-spacing:.3px;}
+  .opt-img .opt-word .blank-slot{color:var(--pink);font-weight:900;border-bottom:3px solid var(--pink);padding:0 3px;margin-right:1px;}
+  .opt-img .opt-word-vi{font-size:12px;font-style:italic;color:#8a63c9;}
+  .opt-img:hover:not(.disabled){transform:translateY(-3px) scale(1.04);background:#f1ecff;}
+  .opt-img:active:not(.disabled){transform:translateY(1px);}
+  .opt-img.disabled{cursor:default;pointer-events:none;}
+  .opt-img.correct{background:var(--green);border-color:#04a67f;box-shadow:0 0 0 4px #06d6a055;}
+  .opt-img.correct .opt-word, .opt-img.correct .opt-word .blank-slot, .opt-img.correct .opt-word-vi{color:#fff;border-color:#fff;}
+  .opt-img.wrong{background:var(--pink);border-color:#c60050;opacity:.55;}
+  .opt-img.wrong .opt-word, .opt-img.wrong .opt-word .blank-slot, .opt-img.wrong .opt-word-vi{color:#fff;border-color:#fff;}
+  .opt-listen{
+    position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;
+    background:var(--blue);color:#fff;border:none;font-size:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.3);
+  }
+  .opt-listen:active{transform:scale(.9);}
+
+  .feedback-icon{font-size:52px;text-align:center;line-height:1;margin-top:14px;animation:iconpop .45s cubic-bezier(.2,1.5,.4,1);}
+  @keyframes iconpop{0%{transform:scale(0);opacity:0;}60%{transform:scale(1.25);}100%{transform:scale(1);opacity:1;}}
+  .feedback{margin-top:4px;text-align:center;font-family:'Baloo 2';font-weight:700;font-size:19px;min-height:26px;}
+  .feedback.good{color:#04a67f;}
+  .feedback.bad{color:#c60050;}
+  .feedback-vi{text-align:center;font-size:13px;font-style:italic;color:#6b5b95;min-height:18px;}
+
+  .tpr-panel{display:none;margin-top:16px;text-align:center;background:linear-gradient(160deg,#fff6da,#fff);border:3px dashed var(--orange);border-radius:18px;padding:18px;}
+  .tpr-panel.show{display:block;}
+  .tpr-title{font-family:'Baloo 2';font-weight:800;color:var(--orange);font-size:17px;margin-bottom:2px;}
+  .tpr-title-vi{font-size:12.5px;font-style:italic;color:#b56a00;margin-bottom:10px;}
+  .tpr-visual{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px;}
+  .sound-pulse{
+    position:relative;width:64px;height:64px;border-radius:50%;
+    background:var(--purple);color:#fff;font-family:'Baloo 2';font-weight:800;font-size:20px;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #6f2fc9;
+  }
+  .sound-pulse::before, .sound-pulse::after{
+    content:'';position:absolute;inset:0;border-radius:50%;border:3px solid var(--purple);
+    animation:pulseRing 1.6s ease-out infinite;
+  }
+  .sound-pulse::after{animation-delay:.5s;}
+  @keyframes pulseRing{0%{transform:scale(1);opacity:.8;}100%{transform:scale(1.9);opacity:0;}}
+  .tpr-emoji{font-size:64px;line-height:1;animation:moveBounce .6s ease-in-out infinite alternate;}
+  @keyframes moveBounce{0%{transform:translateY(0) rotate(-6deg);}100%{transform:translateY(-14px) rotate(6deg);}}
+  .tpr-instruction{font-family:'Baloo 2';font-weight:700;font-size:17px;color:var(--navy);margin-bottom:2px;line-height:1.4;}
+  .tpr-instruction strong{color:var(--pink);}
+  .tpr-instruction-vi{font-size:13px;font-style:italic;color:#b56a00;margin-bottom:12px;line-height:1.4;}
+  .tpr-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
+  .tpr-timer{
+    width:52px;height:52px;border-radius:50%;margin:0 auto 12px;
+    background:var(--orange);color:#fff;font-family:'Baloo 2';font-weight:800;font-size:22px;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #b45400;
+  }
+  .confirm-btn{
+    font-family:'Baloo 2';font-weight:800;font-size:15px;color:#fff;
+    background:linear-gradient(180deg,var(--green),#04a67f);border:none;border-radius:40px;
+    padding:10px 22px;cursor:pointer;box-shadow:0 5px 0 #037a5c;
+  }
+
+  .next-btn{
+    display:none;margin:14px auto 0;font-family:'Baloo 2';font-weight:800;font-size:18px;color:#fff;
+    background:linear-gradient(180deg,var(--orange),#e06a00);border:none;border-radius:40px;
+    padding:12px 34px;cursor:pointer;box-shadow:0 5px 0 #b45400;
+  }
+  .next-btn.show{display:block;}
+
+  .letters-track{display:grid;grid-template-columns:repeat(13,1fr);gap:6px;max-width:640px;width:100%;margin-top:6px;}
+  .lt{
+    aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2';font-weight:700;font-size:clamp(11px,1.6vw,15px);
+    background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);
+  }
+  .lt.done{background:var(--yellow);color:var(--navy);border-color:#fff;}
+  .confetti-piece{position:fixed;top:-20px;z-index:80;pointer-events:none;border-radius:2px;}
+
+  .end-screen{
+    display:none;flex-direction:column;align-items:center;gap:10px;background:var(--cream);
+    border-radius:28px;padding:36px 26px;border:6px solid #fff;max-width:520px;margin:0 auto;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);text-align:center;
+  }
+  .end-screen.show{display:flex;}
+  .end-screen h2{font-family:'Baloo 2';font-weight:800;font-size:clamp(26px,4vw,34px);color:var(--pink);margin:0;}
+  .end-screen h2 .vi{display:block;font-size:14px;color:#9a5bb0;font-style:italic;font-family:'Nunito';margin-top:4px;}
+  .end-stars{font-size:44px;letter-spacing:6px;}
+  .end-stats{font-family:'Baloo 2';font-weight:700;font-size:20px;color:var(--navy);}
+  .end-stats-vi{font-size:13.5px;font-style:italic;color:#6b5b95;}
+  .restart-btn{
+    font-family:'Baloo 2';font-weight:800;font-size:18px;color:#fff;
+    background:linear-gradient(180deg,var(--purple),#6f2fc9);border:none;border-radius:40px;
+    padding:14px 36px;cursor:pointer;box-shadow:0 5px 0 #4e1a99;margin-top:6px;
+  }
+  @media (max-width:480px){.letters-track{grid-template-columns:repeat(9,1fr);}}
+</style>
+</head>
+<body>
+<div class="stars-bg"></div>
+<div class="wrap">
+
+  <div class="banner">
+    <h1>🎡 LUCKY WHEEL PHONICS GAME 🎡</h1>
+    <p>Listen, Choose &amp; MOVE! Letter Sounds A&ndash;Z</p>
+    <span class="vi-sub">Nghe, Chọn &amp; Vận Động! Luyện âm chữ cái A&ndash;Z</span>
+    <div class="bulbs" id="bulbs"></div>
+  </div>
+
+  <div class="audio-warning" id="audioWarning"></div>
+  <div class="topbar">
+    <div class="ticket">⭐ Score: <span class="big" id="scoreVal">0</span></div>
+    <div class="ticket">🔤 Letters: <span class="big" id="progressVal">0</span>/26</div>
+  </div>
+
+  <div class="game-area" id="gameArea">
+    <div class="wheel-zone">
+      <div class="lightring" id="lightRing"></div>
+      <div class="pointer"></div>
+      <svg id="wheelSvg" viewBox="0 0 400 400"></svg>
+      <div class="hub">🎯</div>
+    </div>
+
+    <button class="spin-btn" id="spinBtn">SPIN NOW! 🎉</button>
+    <div class="hint-text" id="hintText">Tap the button to spin the lucky wheel!</div>
+    <div class="hint-text-vi" id="hintTextVi">Nhấn nút để quay vòng quay may mắn!</div>
+
+    <div class="letters-track" id="lettersTrack"></div>
+  </div>
+
+  <div class="end-screen" id="endScreen">
+    <div class="end-stars">🌟🌟🌟</div>
+    <h2>CONGRATULATIONS! <span class="vi">CHÚC MỪNG BÉ!</span></h2>
+    <div class="end-stats" id="endStats"></div>
+    <div class="end-stats" id="endMsg"></div>
+    <div class="end-stats-vi" id="endMsgVi"></div>
+    <button class="restart-btn" id="restartBtn">🔄 Play Again</button>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="qcard">
+    <div class="qletter-badge" id="qLetterBadge">A</div>
+
+    <div class="zone sound-zone">
+      <div class="zone-label">🔊 SOUND <span class="vi">(âm phát ra)</span></div>
+      <div class="sound-chip" id="soundChip">/b/</div>
+      <div class="chant-line" id="chantLine">Ball starts with <span class="hl">b, b, b</span>... Ball!</div>
+      <button class="listen-btn" id="listenBtn">🔊 Listen to the sound</button>
+    </div>
+
+    <div class="qprompt" id="qPrompt">What sound does this letter make?</div>
+    <div class="qprompt-vi" id="qPromptVi">Chữ cái này phát ra âm gì?</div>
+
+    <div class="zone name-zone">
+      <div class="zone-label">🔤 LETTER NAME <span class="vi">(tên gọi chữ cái)</span></div>
+      <button class="name-btn" id="nameBtn">Hear the letter name</button>
+      <div class="name-ipa" id="nameIPA" style="display:none;"></div>
+    </div>
+
+    <div class="sound-vs-name">👆 Hai khái niệm khác nhau: <b>Sound</b> là âm chữ cái phát ra khi đọc từ (vd: /b/) — <b>Letter name</b> là tên gọi của chữ cái đó trong bảng chữ cái (vd: "Bee"). Không mâu thuẫn nhau nhé!</div>
+
+    <div class="options" id="optionsBox"></div>
+    <div class="feedback-icon" id="feedbackIcon" style="display:none;"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="feedback-vi" id="feedbackVi"></div>
+
+    <div class="tpr-panel" id="tprPanel">
+      <div class="tpr-title">🎤🏃 Say it &amp; Move it!</div>
+      <div class="tpr-title-vi">Nói to &amp; Vận động theo nhé!</div>
+      <div class="tpr-visual">
+        <div class="sound-pulse" id="soundPulseSym">/b/</div>
+        <div class="tpr-emoji" id="tprEmoji">⚽</div>
+      </div>
+      <div class="tpr-instruction" id="tprInstruction"><strong>Say: /b/ ... Ball</strong><br>Bounce up and down like a ball!</div>
+      <div class="tpr-instruction-vi" id="tprInstructionVi">Nảy lên xuống như quả bóng!</div>
+      <div class="tpr-row">
+        <button class="listen-btn" id="tprListenBtn" style="margin:0;">🔊 Hear it again</button>
+      </div>
+      <div class="tpr-timer" id="tprTimer">60</div>
+      <button class="confirm-btn" id="tprDoneBtn">✅ I did it!</button>
+    </div>
+
+    <button class="next-btn" id="nextBtn">Next Question ➜</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DATA: 26 letters — keyword (+ Vietnamese meaning), emoji,
+   phonics sound (TTS text), phoneme symbol, and a TPR movement
+   action (English + Vietnamese) for bilingual learners.
+   ========================================================= */
+const ALPHA = [
+  {l:'A',w:'Apple',wVi:'quả táo',e:'🍎',sound:'at',sym:'a',
+   action:'Pretend to take a big bite of an apple!',actionVi:'Giả vờ cắn một miếng táo thật to nhé!'},
+  {l:'B',w:'Ball',wVi:'quả bóng',e:'⚽',sound:'buh',sym:'b',
+   action:'Bounce up and down like a ball!',actionVi:'Nhảy lên xuống như quả bóng nảy!'},
+  {l:'C',w:'Cat',wVi:'con mèo',e:'🐱',sound:'kuh',sym:'k',
+   action:'Stretch your arms and meow like a cat!',actionVi:'Duỗi tay và kêu "meo meo" như mèo!'},
+  {l:'D',w:'Dog',wVi:'con chó',e:'🐶',sound:'duh',sym:'d',
+   action:'Wag your hips like a happy dog!',actionVi:'Lắc hông như chú chó vui vẻ vẫy đuôi!'},
+  {l:'E',w:'Elephant',wVi:'con voi',e:'🐘',sound:'egg',sym:'e',
+   action:'Swing your arm like an elephant trunk!',actionVi:'Đung đưa cánh tay như vòi voi!'},
+  {l:'F',w:'Fish',wVi:'con cá',e:'🐟',sound:'fff',sym:'f',
+   action:'Wiggle your body like a swimming fish!',actionVi:'Uốn lượn cơ thể như cá đang bơi!'},
+  {l:'G',w:'Goat',wVi:'con dê',e:'🐐',sound:'guh',sym:'g',
+   action:'Hop on one foot like a goat on a hill!',actionVi:'Nhảy lò cò một chân như dê leo đồi!'},
+  {l:'H',w:'Hat',wVi:'cái mũ',e:'👒',sound:'huh',sym:'h',
+   action:'Pretend to tip your hat and take a bow!',actionVi:'Giả vờ ngả mũ và cúi chào!'},
+  {l:'I',w:'Insect',wVi:'côn trùng',e:'🐜',sound:'in',sym:'i',
+   action:'Wiggle your fingers and crawl like a little insect!',actionVi:'Ngoáy ngón tay và bò như một chú côn trùng nhỏ!'},
+  {l:'J',w:'Juice',wVi:'nước ép',e:'🧃',sound:'juh',sym:'j',
+   action:'Pretend to shake and pour some juice!',actionVi:'Giả vờ lắc và rót nước ép!'},
+  {l:'K',w:'Kite',wVi:'cái diều',e:'🪁',sound:'kuh',sym:'k',
+   action:'Run in place like you are flying a kite!',actionVi:'Chạy tại chỗ như đang thả diều!'},
+  {l:'L',w:'Lion',wVi:'sư tử',e:'🦁',sound:'lll',sym:'l',
+   action:'Roar loudly and shake your lion mane!',actionVi:'Gầm to và lắc bờm như sư tử!'},
+  {l:'M',w:'Monkey',wVi:'con khỉ',e:'🐒',sound:'mmm',sym:'m',
+   action:'Scratch your head and jump like a monkey!',actionVi:'Gãi đầu và nhảy như chú khỉ!'},
+  {l:'N',w:'Nest',wVi:'tổ chim',e:'🪺',sound:'nnn',sym:'n',
+   action:'Curl up small like a bird in a nest!',actionVi:'Cuộn tròn nhỏ như chim non trong tổ!'},
+  {l:'O',w:'Orange',wVi:'quả cam',e:'🍊',sound:'on',sym:'o',
+   action:'Pretend to peel and squeeze an orange!',actionVi:'Giả vờ bóc vỏ và vắt cam!'},
+  {l:'P',w:'Pig',wVi:'con lợn',e:'🐷',sound:'puh',sym:'p',
+   action:'Snort and wiggle like a little pig!',actionVi:'Kêu "ụt ịt" và lắc lư như chú lợn con!'},
+  {l:'Q',w:'Queen',wVi:'nữ hoàng',e:'👑',sound:'kwuh',sym:'kw',
+   action:'Stand tall and wave like a queen!',actionVi:'Đứng thẳng và vẫy tay như nữ hoàng!'},
+  {l:'R',w:'Rabbit',wVi:'con thỏ',e:'🐰',sound:'rrr',sym:'r',
+   action:'Hop like a bunny rabbit!',actionVi:'Nhảy như chú thỏ con!'},
+  {l:'S',w:'Sun',wVi:'mặt trời',e:'☀️',sound:'sss',sym:'s',
+   action:'Stretch your arms up high like sunshine!',actionVi:'Giơ cao tay như ánh nắng mặt trời!'},
+  {l:'T',w:'Tiger',wVi:'con hổ',e:'🐯',sound:'tuh',sym:'t',
+   action:'Growl and claw the air like a tiger!',actionVi:'Gầm gừ và giơ vuốt như hổ!'},
+  {l:'U',w:'Umbrella',wVi:'cái ô',e:'☂️',sound:'up',sym:'u',
+   action:'Open your arms wide like an umbrella!',actionVi:'Dang rộng tay như cây ô đang mở!'},
+  {l:'V',w:'Van',wVi:'xe tải nhỏ',e:'🚐',sound:'vuh',sym:'v',
+   action:'Pretend to steer a van, vroom vroom!',actionVi:'Giả vờ lái xe, "brừm brừm"!'},
+  {l:'W',w:'Watermelon',wVi:'dưa hấu',e:'🍉',sound:'wuh',sym:'w',
+   action:'Pretend to slice and munch watermelon!',actionVi:'Giả vờ cắt và ăn dưa hấu ngon lành!'},
+  {l:'X',w:'Xylophone',wVi:'đàn phách',e:'🎼',sound:'zy',sym:'z',
+   action:'Tap your knees like playing a xylophone!',actionVi:'Gõ đầu gối như đang chơi đàn phách!'},
+  {l:'Y',w:'Yo-yo',wVi:'con quay yoyo',e:'🪀',sound:'yuh',sym:'y',
+   action:'Bend your knees up and down like a yo-yo!',actionVi:'Gập gối lên xuống như chơi yoyo!'},
+  {l:'Z',w:'Zebra',wVi:'ngựa vằn',e:'🦓',sound:'zzz',sym:'z',
+   action:'Gallop in place like a zebra!',actionVi:'Phi nước đại tại chỗ như ngựa vằn!'},
+];
+
+// Standard letter-NAME pronunciation (IPA), as opposed to the phonics letter-SOUND
+// data above. This is what "Hear the letter name" plays/shows — e.g. A is /eɪ/ ("Ây"),
+// distinct from the phonics sound /æ/ that the main game teaches.
+const NAME_IPA = {
+  A:'eɪ', B:'biː', C:'siː', D:'diː', E:'iː', F:'ɛf', G:'dʒiː', H:'eɪtʃ',
+  I:'aɪ', J:'dʒeɪ', K:'keɪ', L:'ɛl', M:'ɛm', N:'ɛn', O:'oʊ', P:'piː',
+  Q:'kjuː', R:'ɑr', S:'ɛs', T:'tiː', U:'juː', V:'viː', W:'ˈdʌbəl juː',
+  X:'ɛks', Y:'waɪ', Z:'ziː (US) / zɛd (UK)',
+};
+
+const COLORS = ['#FF3E7F','#FFD23F','#00B4D8','#06D6A0','#9B5DE5','#FF8C42'];
+const PRAISE_ICONS = ['👏','🌟','🏆','🎉','💯','😄','🥳'];
+const ENCOURAGE_ICONS = ['💪','🤔','👍','🌈','🙂'];
+const PRAISE = [
+  {en:'Great job!',vi:'Làm tốt lắm!'},{en:'Excellent!',vi:'Xuất sắc!'},
+  {en:'Well done!',vi:'Giỏi quá!'},{en:'Super!',vi:'Tuyệt vời!'},
+  {en:'Amazing!',vi:'Thật đáng kinh ngạc!'},{en:'You did it!',vi:'Con làm được rồi!'},
+];
+const ENCOURAGE = [
+  {en:'Try again!',vi:'Thử lại nhé!'},{en:'Almost there!',vi:'Sắp đúng rồi!'},
+  {en:'Keep going!',vi:'Cố lên nào!'},{en:'You can do it!',vi:'Con làm được mà!'},
+  {en:'Nice try!',vi:'Cố gắng tốt lắm!'},
+];
+
+let usedLetters = new Set();
+let score = 0;
+let currentEntry = null;
+let currentOptions = null;
+let movementInterval = null;
+
+const svg = document.getElementById('wheelSvg');
+const N = ALPHA.length;
+const SLICE = 360/N;
+const R = 195, CX = 200, CY = 200;
+function polar(cx,cy,r,angleDeg){
+  const a = (angleDeg-90) * Math.PI/180;
+  return [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+}
+function buildWheel(){
+  svg.innerHTML='';
+  for(let i=0;i<N;i++){
+    const startA = i*SLICE, endA = (i+1)*SLICE;
+    const [x1,y1] = polar(CX,CY,R,startA);
+    const [x2,y2] = polar(CX,CY,R,endA);
+    const large = SLICE>180?1:0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M${CX},${CY} L${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} Z`);
+    path.setAttribute('fill', COLORS[i%COLORS.length]);
+    path.setAttribute('stroke', '#ffffff');
+    path.setAttribute('stroke-width','2');
+    path.setAttribute('id', 'slice-'+ALPHA[i].l);
+    svg.appendChild(path);
+
+    const midA = startA + SLICE/2;
+    const [lx,ly] = polar(CX,CY,R*0.78,midA);
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x', lx); text.setAttribute('y', ly);
+    text.setAttribute('fill','#fff');
+    text.setAttribute('font-family','Baloo 2, sans-serif');
+    text.setAttribute('font-weight','800'); text.setAttribute('font-size','15');
+    text.setAttribute('text-anchor','middle'); text.setAttribute('dominant-baseline','middle');
+    text.setAttribute('transform', `rotate(${midA}, ${lx}, ${ly})`);
+    text.textContent = ALPHA[i].l;
+    svg.appendChild(text);
+  }
+}
+buildWheel();
+
+(function buildBulbLights(){
+  const ring = document.getElementById('lightRing');
+  for(let i=0;i<24;i++){
+    const b = document.createElement('div');
+    b.className='b';
+    const rad = (i/24)*360*Math.PI/180;
+    b.style.transform = `translate(${Math.cos(rad)*160}px, ${Math.sin(rad)*160}px)`;
+    b.style.animationDelay = (i*0.07)+'s';
+    b.style.color = COLORS[i%COLORS.length];
+    b.style.background = COLORS[i%COLORS.length];
+    ring.appendChild(b);
+  }
+})();
+(function headerBulbs(){
+  const wrap = document.getElementById('bulbs');
+  for(let i=0;i<10;i++){
+    const b=document.createElement('div');
+    b.className='bulb';
+    b.style.color = COLORS[i%COLORS.length];
+    b.style.background = COLORS[i%COLORS.length];
+    b.style.animationDelay=(i*0.15)+'s';
+    wrap.appendChild(b);
+  }
+})();
+
+const track = document.getElementById('lettersTrack');
+ALPHA.forEach(item=>{
+  const d=document.createElement('div');
+  d.className='lt'; d.id='lt-'+item.l; d.textContent=item.l;
+  track.appendChild(d);
+});
+
+/* =========================================================
+   SPEECH (TTS): phonics letter SOUND x2 (UK+US), letter name
+   on demand, option words, TPR instructions, and spoken
+   praise / encouragement. All spoken audio stays in English —
+   Vietnamese only appears as on-screen text for comprehension.
+   ========================================================= */
+let voicesCache = [];
+function loadVoices(){ voicesCache = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; }
+if('speechSynthesis' in window){ loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; }
+
+// Some browsers (especially on mobile) only allow speechSynthesis to play
+// automatically later (e.g. from a setTimeout) if it has already been
+// triggered once directly inside a user gesture. This "unlocks" audio for
+// the whole session on the very first tap/click anywhere on the page, so
+// every auto-played sound afterward works reliably without extra clicks.
+let speechUnlocked = false;
+function unlockSpeech(){
+  if(speechUnlocked || !('speechSynthesis' in window)) return;
+  speechUnlocked = true;
+  const u = new SpeechSynthesisUtterance(' ');
+  u.volume = 0;
+  window.speechSynthesis.speak(u);
+}
+document.addEventListener('click', unlockSpeech, {once:true, capture:true});
+document.addEventListener('touchstart', unlockSpeech, {once:true, capture:true});
+
+// Self-diagnose a common silent-audio cause: the browser supports the Web
+// Speech API but the device/browser has NO voices installed at all (common
+// in some sandboxed preview windows or minimal Linux browsers). In that
+// case speak() calls run with no error but produce zero sound, which is
+// confusing without an explanation — so we detect it and tell the user.
+function checkAudioAvailability(){
+  const el = document.getElementById('audioWarning');
+  if(!el) return;
+  if(!('speechSynthesis' in window)){
+    el.textContent = "⚠️ Trình duyệt này không hỗ trợ phát âm thanh (Web Speech API). Vui lòng mở file này bằng Chrome, Edge, hoặc Safari trên máy tính hoặc điện thoại thật nhé!";
+    el.style.display = 'block';
+    return;
+  }
+  setTimeout(()=>{
+    const voices = window.speechSynthesis.getVoices();
+    if(voices.length === 0){
+      el.textContent = "⚠️ Máy/trình duyệt hiện tại chưa có giọng đọc tiếng Anh cài sẵn nên chưa nghe được âm thanh. Hãy TẢI FILE NÀY VỀ và mở bằng Chrome, Edge hoặc Safari trên máy tính/điện thoại thật (không phải khung xem trước) để nghe đầy đủ nhé!";
+      el.style.display = 'block';
+    }
+  }, 1500);
+}
+checkAudioAvailability();
+function isNaturalVoice(v){
+  const n = (v.name||'').toLowerCase();
+  return /natural|neural|online|premium|enhanced|wavenet|google/.test(n);
+}
+function pickVoice(langPrefix){
+  const target = langPrefix.toLowerCase();
+  const exact = voicesCache.filter(v=>v.lang && v.lang.toLowerCase()===target);
+  let v = exact.find(isNaturalVoice);
+  if(v) return v;
+  if(exact.length) return exact[0];
+  const prefix = target.slice(0,2), region = target.slice(3);
+  const regionMatches = voicesCache.filter(v=>v.lang && v.lang.toLowerCase().startsWith(prefix) && v.lang.toLowerCase().includes(region));
+  v = regionMatches.find(isNaturalVoice);
+  if(v) return v;
+  if(regionMatches.length) return regionMatches[0];
+  const anyEn = voicesCache.filter(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
+  v = anyEn.find(isNaturalVoice);
+  if(v) return v;
+  return anyEn[0];
+}
+function safeCancel(){
+  try{ window.speechSynthesis.cancel(); }catch(err){ /* never let this break game logic */ }
+}
+function speakOnce(text, langPrefix, rate){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice(langPrefix);
+    if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = langPrefix; }
+    u.rate = rate || 0.8; u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  }catch(err){
+    // A speech failure (bad voice object, unsupported browser quirk, etc.)
+    // must never break the game logic/UI code that runs after this call.
+  }
+}
+// Sound demo: "Letter X says [sound], [sound], [sound]!" — the triple repeat
+// blends a British-accent voice with two American-accent repeats so both
+// accents are still modeled, as requested earlier.
+function speakChantCue(entry){
+  if(!('speechSynthesis' in window)) return;
+  safeCancel();
+  speakOnce(`Letter ${entry.l} says`, 'en-US', 0.85);
+  speakOnce(entry.sound, 'en-GB', 0.72);
+  speakOnce(entry.sound, 'en-US', 0.72);
+  speakOnce(entry.sound, 'en-US', 0.72);
+}
+function speakQuestionAudio(entry, options){
+  if(!('speechSynthesis' in window)) return;
+  safeCancel();
+  speakOnce(`Letter ${entry.l} says`, 'en-US', 0.85);
+  speakOnce(entry.sound, 'en-GB', 0.72);
+  speakOnce(entry.sound, 'en-US', 0.72);
+  speakOnce(entry.sound, 'en-US', 0.72);
+  speakOnce('This letter makes this sound. Listen to the 4 words, then choose the picture that starts with this sound!', 'en-US', 0.88);
+  options.forEach(o=> speakOnce(o.w, 'en-US', 0.8));
+}
+function speakLetterNameOnly(letter){
+  if(!('speechSynthesis' in window)) return;
+  safeCancel();
+  if(letter === 'Z'){
+    // British "Zed" vs American "Zee" is a well-known, genuine difference —
+    // spelled out explicitly so both are heard correctly regardless of voice quirks.
+    speakOnce('Letter Z, Zed', 'en-GB', 0.7);
+    speakOnce('Letter Z, Zee', 'en-US', 0.7);
+  } else {
+    speakOnce(`Letter ${letter}`, 'en-GB', 0.75);
+    speakOnce(`Letter ${letter}`, 'en-US', 0.75);
+  }
+}
+function speakPhrase(text){
+  if(!('speechSynthesis' in window)) return;
+  safeCancel();
+  speakOnce(text, 'en-US', 0.95);
+}
+function speakWordAlone(word){
+  if(!('speechSynthesis' in window)) return;
+  safeCancel();
+  speakOnce(word, 'en-US', 0.8);
+}
+function speakTPRCue(entry){
+  if(!('speechSynthesis' in window)) return;
+  safeCancel();
+  speakOnce(`${entry.w} starts with`, 'en-US', 0.85);
+  speakOnce(entry.sound, 'en-GB', 0.72);
+  speakOnce(entry.sound, 'en-US', 0.72);
+  speakOnce(entry.sound, 'en-US', 0.72);
+  speakOnce(entry.w, 'en-US', 0.85);
+  speakOnce(entry.action, 'en-US', 0.9);
+}
+
+function randOthers(excludeLetter, count){
+  const pool = ALPHA.filter(x=>x.l!==excludeLetter);
+  const picked=[];
+  while(picked.length<count && pool.length){
+    const idx = Math.floor(Math.random()*pool.length);
+    picked.push(pool.splice(idx,1)[0]);
+  }
+  return picked;
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function randomIndex(arr){ return Math.floor(Math.random()*arr.length); }
+function maskFirstLetter(word){
+  return `<span class="blank-slot">_</span>${word.slice(1)}`;
+}
+
+const spinBtn = document.getElementById('spinBtn');
+const hintText = document.getElementById('hintText');
+const hintTextVi = document.getElementById('hintTextVi');
+function setHint(en, vi){ hintText.textContent = en; hintTextVi.textContent = vi; }
+
+let spinning = false;
+let totalRotation = 0;
+
+spinBtn.addEventListener('click', ()=>{
+  if(spinning) return;
+  unlockSpeech();
+  const remaining = ALPHA.filter(a=>!usedLetters.has(a.l));
+  if(remaining.length===0) return;
+
+  spinning = true;
+  spinBtn.disabled = true;
+  setHint('Spinning... 🎡', 'Đang quay... 🎡');
+
+  const target = remaining[Math.floor(Math.random()*remaining.length)];
+  const targetIndex = ALPHA.findIndex(a=>a.l===target.l);
+  const sliceCenter = targetIndex*SLICE + SLICE/2;
+
+  const extraSpins = 6 + Math.floor(Math.random()*3);
+  const netRotationNeeded = (360 - sliceCenter) % 360;
+  totalRotation += extraSpins*360 + netRotationNeeded;
+  svg.style.transform = `rotate(${totalRotation}deg)`;
+
+  setTimeout(()=>{
+    spinning=false;
+    const normalized = ((totalRotation % 360) + 360) % 360;
+    const topOriginalAngle = ((360 - normalized) % 360 + 360) % 360;
+    let landedIndex = Math.floor((topOriginalAngle + 0.0001) / SLICE) % N;
+    let landedEntry = ALPHA[landedIndex];
+    if(usedLetters.has(landedEntry.l)) landedEntry = target;
+
+    setHint('Answer the question to earn a star!', 'Trả lời câu hỏi để nhận ngôi sao!');
+    openQuestion(landedEntry);
+  }, 3500);
+});
+
+const overlay = document.getElementById('overlay');
+const qLetterBadge = document.getElementById('qLetterBadge');
+const soundChip = document.getElementById('soundChip');
+const chantLine = document.getElementById('chantLine');
+const qPrompt = document.getElementById('qPrompt');
+const qPromptVi = document.getElementById('qPromptVi');
+const listenBtn = document.getElementById('listenBtn');
+const nameBtn = document.getElementById('nameBtn');
+const nameIPA = document.getElementById('nameIPA');
+const optionsBox = document.getElementById('optionsBox');
+const feedback = document.getElementById('feedback');
+const feedbackVi = document.getElementById('feedbackVi');
+const feedbackIcon = document.getElementById('feedbackIcon');
+const nextBtn = document.getElementById('nextBtn');
+const tprPanel = document.getElementById('tprPanel');
+const soundPulseSym = document.getElementById('soundPulseSym');
+const tprEmoji = document.getElementById('tprEmoji');
+const tprInstruction = document.getElementById('tprInstruction');
+const tprInstructionVi = document.getElementById('tprInstructionVi');
+const tprListenBtn = document.getElementById('tprListenBtn');
+const tprTimer = document.getElementById('tprTimer');
+const tprDoneBtn = document.getElementById('tprDoneBtn');
+
+const TPR_SECONDS = 60; // a full minute so young learners have plenty of time to listen, read, and act it out
+
+function openQuestion(entry){
+  currentEntry = entry;
+  const others = randOthers(entry.l, 3);
+  currentOptions = shuffle([entry, ...others]);
+
+  qLetterBadge.textContent = entry.l;
+  soundChip.textContent = `/${entry.sym}/`;
+  chantLine.innerHTML = `Letter <span class="hl">${entry.l}</span> says <span class="hl">/${entry.sym}/, /${entry.sym}/, /${entry.sym}/</span>!`;
+  qPrompt.textContent = `This letter makes the sound "/${entry.sym}/". Listen to the 4 words, then choose the picture that starts with this sound!`;
+  qPromptVi.textContent = `Chữ cái này phát ra âm "/${entry.sym}/". Hãy nghe 4 từ rồi chọn đúng hình bắt đầu bằng âm này!`;
+  feedback.textContent=''; feedback.className='feedback'; feedbackVi.textContent='';
+  feedbackIcon.style.display='none'; feedbackIcon.textContent='';
+  nameIPA.style.display='none';
+  nextBtn.classList.remove('show');
+  tprPanel.classList.remove('show');
+  optionsBox.style.display='grid';
+
+  listenBtn.onclick = ()=> speakQuestionAudio(entry, currentOptions);
+  nameBtn.onclick = ()=>{
+    speakLetterNameOnly(entry.l);
+    nameIPA.textContent = `/${NAME_IPA[entry.l]}/`;
+    nameIPA.style.display = 'block';
+  };
+
+  optionsBox.innerHTML='';
+  currentOptions.forEach(opt=>{
+    const card = document.createElement('div');
+    card.className='opt-img';
+    card.tabIndex = 0;
+    card.innerHTML = `
+      <button class="opt-listen" type="button" aria-label="Listen to this word">🔊</button>
+      <span class="opt-emoji">${opt.e}</span>
+      <span class="opt-word">${maskFirstLetter(opt.w)}</span>
+      <span class="opt-word-vi">(${opt.wVi})</span>`;
+    card.querySelector('.opt-listen').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      speakWordAlone(opt.w);
+    });
+    card.addEventListener('click', ()=> handleAnswer(opt, card));
+    optionsBox.appendChild(card);
+  });
+
+  overlay.classList.add('show');
+  setTimeout(()=> speakQuestionAudio(entry, currentOptions), 400);
+}
+
+function handleAnswer(chosenOpt, cardEl){
+  const allCards = optionsBox.querySelectorAll('.opt-img');
+
+  if(chosenOpt.l === currentEntry.l){
+    allCards.forEach(c=> c.classList.add('disabled'));
+    cardEl.classList.add('correct');
+    feedback.className='feedback good';
+    const p = PRAISE[randomIndex(PRAISE)];
+    feedback.textContent = p.en;
+    feedbackVi.textContent = p.vi;
+    feedbackIcon.textContent = PRAISE_ICONS[randomIndex(PRAISE_ICONS)];
+    feedbackIcon.style.display='block';
+    speakPhrase(p.en);
+    score += 10;
+    document.getElementById('scoreVal').textContent = score;
+    markLetterDone(currentEntry.l);
+    launchConfetti();
+    setTimeout(()=> startTPR(currentEntry), 1100);
+  } else {
+    cardEl.classList.add('wrong');
+    cardEl.classList.add('disabled');
+    feedback.className='feedback bad';
+    const enc = ENCOURAGE[randomIndex(ENCOURAGE)];
+    feedback.textContent = enc.en;
+    feedbackVi.textContent = enc.vi;
+    feedbackIcon.textContent = ENCOURAGE_ICONS[randomIndex(ENCOURAGE_ICONS)];
+    feedbackIcon.style.display='block';
+    speakPhrase(enc.en);
+  }
+}
+
+function startTPR(entry){
+  optionsBox.style.display='none';
+  soundPulseSym.textContent = `/${entry.sym}/`;
+  tprEmoji.textContent = entry.e;
+  tprInstruction.innerHTML = `<strong>${entry.w} starts with ${entry.sym}, ${entry.sym}, ${entry.sym}... ${entry.w}!</strong><br>${entry.action}`;
+  tprInstructionVi.textContent = entry.actionVi;
+  tprPanel.classList.add('show');
+
+  tprListenBtn.onclick = ()=> speakTPRCue(entry);
+  tprDoneBtn.onclick = ()=>{ clearInterval(movementInterval); finishTPR(); };
+
+  speakTPRCue(entry);
+
+  let count = TPR_SECONDS;
+  tprTimer.textContent = count;
+  clearInterval(movementInterval);
+  movementInterval = setInterval(()=>{
+    count--;
+    if(count<=0){
+      clearInterval(movementInterval);
+      tprTimer.textContent = '🎉';
+      finishTPR();
+    } else {
+      tprTimer.textContent = count;
+    }
+  }, 1000);
+}
+function finishTPR(){
+  tprPanel.classList.remove('show');
+  nextBtn.classList.add('show');
+}
+
+nextBtn.addEventListener('click', ()=>{
+  overlay.classList.remove('show');
+  safeCancel();
+  clearInterval(movementInterval);
+
+  if(usedLetters.size >= ALPHA.length){
+    showEndScreen();
+  } else {
+    spinBtn.disabled = false;
+    setHint('Spin again to learn another letter!', 'Quay tiếp để học chữ cái khác nhé!');
+  }
+});
+
+function markLetterDone(letter){
+  usedLetters.add(letter);
+  document.getElementById('lt-'+letter).classList.add('done');
+  document.getElementById('progressVal').textContent = usedLetters.size;
+  document.getElementById('slice-'+letter).style.opacity = '0.55';
+}
+
+function launchConfetti(){
+  const colors = COLORS;
+  for(let i=0;i<28;i++){
+    const p = document.createElement('div');
+    p.className='confetti-piece';
+    const size = 6+Math.random()*6;
+    p.style.width = size+'px'; p.style.height = (size*1.4)+'px';
+    p.style.left = (Math.random()*100)+'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(p);
+    const duration = 1800+Math.random()*1200;
+    const drift = (Math.random()-0.5)*200;
+    p.animate([
+      {transform:`translate(0,0) rotate(0deg)`, opacity:1},
+      {transform:`translate(${drift}px, 100vh) rotate(${360+Math.random()*360}deg)`, opacity:0.9}
+    ], {duration, easing:'ease-in'});
+    setTimeout(()=>p.remove(), duration+50);
+  }
+}
+
+function showEndScreen(){
+  document.getElementById('gameArea').style.display='none';
+  const end = document.getElementById('endScreen');
+  end.classList.add('show');
+  document.getElementById('endStats').textContent = `Total Score: ${score} ⭐  |  Correct Answers: 26/26`;
+  document.getElementById('endMsg').textContent = 'You did an amazing job with all 26 letter sounds! Excellent job! 🏆';
+  document.getElementById('endMsgVi').textContent = 'Con đã hoàn thành xuất sắc cả 26 âm chữ cái! Giỏi quá! 🏆';
+  speakPhrase('Congratulations! You did an amazing job!');
+  launchConfetti(); setTimeout(launchConfetti, 400); setTimeout(launchConfetti, 800);
+}
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  clearInterval(movementInterval);
+  usedLetters.clear(); score=0; totalRotation = 0;
+  svg.style.transition='none'; svg.style.transform='rotate(0deg)';
+  requestAnimationFrame(()=>{ svg.style.transition='transform 3.4s cubic-bezier(.17,.67,.16,1)'; });
+  document.getElementById('scoreVal').textContent='0';
+  document.getElementById('progressVal').textContent='0';
+  document.querySelectorAll('.lt').forEach(el=>el.classList.remove('done'));
+  ALPHA.forEach(a=>{ document.getElementById('slice-'+a.l).style.opacity='1'; });
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('gameArea').style.display='flex';
+  spinBtn.disabled=false;
+  setHint('Tap the button to spin the lucky wheel!', 'Nhấn nút để quay vòng quay may mắn!');
+});
+</script>
+</body>
+</html>
